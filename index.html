@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persona Forge</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0604;
+  --surface: #110b08;
+  --surface2: #1a1009;
+  --surface3: #22160d;
+  --border: rgba(212,160,23,0.08);
+  --border2: rgba(212,160,23,0.18);
+  --text: #f0e8d8;
+  --muted: #9e8c72;
+  --dim: #5c4e38;
+  --accent: #c0392b;
+  --accent-glow: rgba(192,57,43,0.25);
+  --accent2: #d4a017;
+  --accent3: #e8c84a;
+  --danger: #e84040;
+  --warn: #e07b30;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.logo-main {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+.logo-main span { color: var(--accent2); }
+.logo-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.14em;
+}
+.header-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--accent2);
+  border: 1px solid rgba(212,160,23,0.3);
+  padding: 2px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.12em;
+}
+
+/* ===== LAYOUT ===== */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+
+/* ===== MODE SELECTOR ===== */
+.mode-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+@media(max-width:600px) { .mode-selector { grid-template-columns: 1fr; } }
+
+.mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 18px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--border2);
+  transition: background 0.2s;
+}
+.mode-card:hover { border-color: rgba(212,160,23,0.3); }
+.mode-card.active { border-color: var(--accent2); background: rgba(212,160,23,0.04); }
+.mode-card.active::before { background: var(--accent2); }
+.mode-icon { font-size: 22px; margin-bottom: 8px; }
+.mode-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.mode-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.mode-tag {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin-top: 8px;
+}
+.mode-card.active .mode-tag { color: var(--accent2); border-color: rgba(212,160,23,0.3); }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+.card-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  background: rgba(192,57,43,0.1);
+  border: 1px solid rgba(192,57,43,0.3);
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.card-body { padding: 20px; }
+
+/* ===== FORM ===== */
+.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.fg-1 { grid-template-columns: 1fr; }
+.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media(max-width:560px) { .fg, .fg-3 { grid-template-columns: 1fr; } }
+.f { display: flex; flex-direction: column; gap: 6px; }
+label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+label .opt { font-family: 'Noto Sans JP', sans-serif; text-transform: none; font-size: 11px; color: var(--dim); margin-left: 6px; letter-spacing: 0; }
+label .req { color: var(--accent); margin-left: 2px; }
+
+input[type=text], select, textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.18s;
+  width: 100%;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent2); }
+textarea { resize: vertical; line-height: 1.7; min-height: 120px; }
+
+/* ===== UPLOAD AREA ===== */
+.upload-area {
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: 6px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.upload-area:hover, .upload-area.drag { border-color: var(--accent2); background: rgba(212,160,23,0.04); }
+.upload-icon { font-size: 28px; margin-bottom: 8px; }
+.upload-label { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.upload-hint { font-size: 11px; color: var(--dim); font-family: 'IBM Plex Mono', monospace; }
+.upload-status { font-size: 12px; margin-top: 10px; }
+
+/* ===== API KEY ===== */
+.api-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.api-row input { flex: 1; min-width: 200px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.btn-sm {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s;
+}
+.btn-sm:hover { color: var(--text); border-color: var(--accent2); }
+.key-st { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--dim); }
+.key-st.ok { color: var(--accent3); }
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 13px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.02em;
+}
+.btn-primary:hover:not(:disabled) { background: #a93226; transform: translateY(-1px); box-shadow: 0 4px 20px var(--accent-glow); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-secondary:hover { border-color: var(--accent2); color: var(--text); }
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+.btn-ghost:hover { color: var(--text); background: var(--surface2); }
+.btn-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+/* ===== LOADING ===== */
+.loading-bar {
+  display: none;
+  height: 2px;
+  background: var(--surface3);
+  border-radius: 1px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.loading-bar.on { display: block; }
+.loading-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 1px;
+  animation: loadpulse 1.4s ease-in-out infinite;
+}
+@keyframes loadpulse {
+  0% { width: 0%; margin-left: 0; }
+  50% { width: 60%; margin-left: 20%; }
+  100% { width: 0%; margin-left: 100%; }
+}
+.loading-text { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+/* ===== PERSONA PREVIEW ===== */
+.persona-preview-list { display: flex; flex-direction: column; gap: 12px; }
+.persona-preview-card {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  overflow: hidden;
+}
+.preview-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.preview-emoji { font-size: 20px; flex-shrink: 0; }
+.preview-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 700;
+  flex: 1;
+}
+.preview-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.preview-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(212,160,23,0.08);
+  border: 1px solid rgba(212,160,23,0.2);
+  color: var(--accent2);
+}
+.preview-toggle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  flex-shrink: 0;
+}
+.preview-body { padding: 0 16px 14px; display: none; }
+.preview-body.open { display: block; }
+.preview-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.preview-profile-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+.preview-profile {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.8;
+  background: var(--surface3);
+  border-radius: 4px;
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  border: 1px solid var(--border);
+}
+.preview-profile[contenteditable=true] {
+  outline: none;
+  border-color: var(--accent2);
+  cursor: text;
+}
+.preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.emoji-input {
+  width: 60px;
+  text-align: center;
+  font-size: 18px;
+  padding: 6px;
+}
+
+/* ===== EXPORT ===== */
+.export-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.export-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+  margin-right: 4px;
+}
+.export-info { font-size: 12px; color: var(--muted); }
+
+/* ===== ERR ===== */
+.err-msg {
+  display: none;
+  background: rgba(232,64,64,0.08);
+  border: 1px solid rgba(232,64,64,0.25);
+  border-radius: 4px;
+  color: var(--danger);
+  padding: 10px 14px;
+  font-size: 12px;
+  margin-top: 12px;
+}
+.err-msg.on { display: block; }
+
+/* ===== HINT ===== */
+.hint {
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: rgba(212,160,23,0.04);
+  border-radius: 4px;
+  border-left: 2px solid rgba(212,160,23,0.2);
+  margin-bottom: 14px;
+}
+
+/* ===== SECTION HIDE ===== */
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-main">Persona <span>Forge</span></div>
+    <div class="logo-sub">v1.0</div>
+  </div>
+  <div class="header-badge">PERSONA BUILDER</div>
+</header>
+
+<div class="container">
+
+  <!-- API KEY -->
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-head">
+      <span class="card-badge">CONFIG</span>
+      <span class="card-title">AI設定</span>
+    </div>
+    <div class="card-body">
+      <div class="api-row">
+        <select id="aiModel" onchange="switchModel()" style="width:auto;flex-shrink:0">
+          <option value="claude">Claude Sonnet</option>
+          <option value="gemini">Gemini 2.5 Flash</option>
+          <option value="openai">GPT-4o</option>
+        </select>
+        <input type="password" id="apiKeyInput" placeholder="APIキーを入力" />
+        <button class="btn-sm" onclick="saveKey()">保存</button>
+        <span class="key-st" id="keySt">未設定</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE SELECTOR -->
+  <div class="mode-selector">
+    <div class="mode-card active" id="mode-stat" onclick="setMode('stat')">
+      <div class="mode-icon">📊</div>
+      <div class="mode-title">統計型</div>
+      <div class="mode-desc">DS.InsightなどのセグメントデータをペーストしてAIが人物像を生成</div>
+      <span class="mode-tag">PDF / テキスト貼付</span>
+    </div>
+    <div class="mode-card" id="mode-doc" onclick="setMode('doc')">
+      <div class="mode-icon">📄</div>
+      <div class="mode-title">記述型</div>
+      <div class="mode-desc">PPTXや既存ペルソナ文書のテキストをそのまま変換</div>
+      <span class="mode-tag">既存ドキュメント</span>
+    </div>
+    <div class="mode-card" id="mode-form" onclick="setMode('form')">
+      <div class="mode-icon">✏️</div>
+      <div class="mode-title">手入力</div>
+      <div class="mode-desc">フォームで基本属性を入力してAIが肉付けしてsystemPromptを生成</div>
+      <span class="mode-tag">ゼロから作成</span>
+    </div>
+  </div>
+
+  <!-- ===== STAT MODE ===== -->
+  <div class="mode-panel active" id="panel-stat">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-badge">INPUT</span>
+        <span class="card-title">統計データ入力</span>
+      </div>
+      <div class="card-body">
+        <div class="hint">DS.Insight、Nielsen、GfKなどのセグメントレポートからコピーしたテキストを貼り付けてください。PDFから直接コピー可。</div>
+        <div class="fg fg-1">
+          <div class="f">
+            <label>セグメント定義 / レポートタイトル<span class="opt">（例：ショッピング・旅行に興味がある大学生女性）</span></label>
+            <input type="text" id="stat-title" placeholder="ターゲットセグメントの名称や定義" />
+          </div>
+        </div>
+        <div class="fg fg-1">
+          <div class="f">
+            <label>統計データ・レポートテキスト<span class="req">*</span></label>
+            <textarea id="stat-data" style="min-height:200px" placeholder="ここにレポートからコピーしたテキストを貼り付け。&#10;性年代割合、ライフイベント、興味関心、購買意向、利用サービス、検索キーワードなど"></textarea>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="f">
+            <label>生成するペルソナ数<span class="opt">（1〜5）</span></label>
+            <select id="stat-count">
+              <option value="1">1体</option>
+              <option value="2">2体</option>
+              <option value="3" selected>3体</option>
+              <option value="4">4体</option>
+              <option value="5">5体</option>
+            </select>
+          </div>
+          <div class="f">
+            <label>用途コンテキスト<span class="opt">（任意）</span></label>
+            <input type="text" id="stat-context" placeholder="例：楽天カードの広告診断用" />
+          </div>
+        </div>
+        <div class="err-msg" id="stat-err"></div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="generateStat()">🔥 ペルソナを生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DOC MODE ===== -->
+  <div class="mode-panel" id="panel-doc">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-badge">INPUT</span>
+        <span class="card-title">ペルソナ文書入力</span>
+      </div>
+      <div class="card-body">
+        <div class="hint">PPTXやWordのペルソナ資料をテキストコピーして貼り付けてください。複数ペルソナが含まれていても自動で分割します。</div>
+        <div class="fg fg-1">
+          <div class="f">
+            <label>ペルソナ文書テキスト<span class="req">*</span></label>
+            <textarea id="doc-data" style="min-height:260px" placeholder="PPTXやWordからコピーしたペルソナ文書テキストを貼り付け。&#10;名前・年齢・職業・ライフスタイル・消費行動・情報収集行動など"></textarea>
+          </div>
+        </div>
+        <div class="fg fg-1">
+          <div class="f">
+            <label>用途コンテキスト<span class="opt">（任意）</span></label>
+            <input type="text" id="doc-context" placeholder="例：楽天カードの広告診断用" />
+          </div>
+        </div>
+        <div class="err-msg" id="doc-err"></div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="generateDoc()">🔥 ペルソナを変換</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FORM MODE ===== -->
+  <div class="mode-panel" id="panel-form">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-badge">INPUT</span>
+        <span class="card-title">ペルソナ情報入力</span>
+      </div>
+      <div class="card-body">
+        <div id="formPersonas">
+          <div class="form-persona" id="fp-0">
+            <div class="fg">
+              <div class="f"><label>名前<span class="req">*</span></label><input type="text" class="fp-name" placeholder="例：村田さくら" /></div>
+              <div class="f"><label>年齢・性別</label><input type="text" class="fp-age" placeholder="例：18歳・女性" /></div>
+            </div>
+            <div class="fg">
+              <div class="f"><label>職業・立場</label><input type="text" class="fp-job" placeholder="例：大学1年生" /></div>
+              <div class="f"><label>居住地</label><input type="text" class="fp-area" placeholder="例：東京都内、実家暮らし" /></div>
+            </div>
+            <div class="fg fg-1">
+              <div class="f"><label>一言で表すと</label><input type="text" class="fp-tagline" placeholder="例：失敗したくないから、先に調べ尽くす" /></div>
+            </div>
+            <div class="fg fg-1">
+              <div class="f">
+                <label>特徴・行動・価値観キーワード<span class="opt">（カンマ区切り）</span></label>
+                <input type="text" class="fp-keywords" placeholder="例：失敗回避, 推し活, コスパ最適化, SNS重視, TikTok" />
+              </div>
+            </div>
+            <div class="fg fg-1">
+              <div class="f">
+                <label>補足情報<span class="opt">（任意）</span></label>
+                <textarea class="fp-notes" style="min-height:80px" placeholder="行動パターン、消費特性、メディア利用など自由に"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-secondary" onclick="addFormPersona()" style="margin-top:8px;font-size:12px">+ ペルソナを追加</button>
+
+        <div class="divider"></div>
+        <div class="fg fg-1">
+          <div class="f">
+            <label>用途コンテキスト<span class="opt">（任意）</span></label>
+            <input type="text" id="form-context" placeholder="例：楽天カードの広告診断用" />
+          </div>
+        </div>
+        <div class="err-msg" id="form-err"></div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="generateForm()">🔥 ペルソナを生成</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOADING ===== -->
+  <div id="loadingArea" style="display:none;margin-bottom:16px">
+    <div class="loading-text" id="loadingText">生成中...</div>
+    <div class="loading-bar on"><div class="loading-bar-inner"></div></div>
+  </div>
+
+  <!-- ===== RESULT ===== -->
+  <div id="resultSection" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-badge">RESULT</span>
+        <span class="card-title">生成されたペルソナ</span>
+      </div>
+      <div class="card-body">
+        <div style="font-size:11px;color:var(--dim);margin-bottom:14px;font-family:'IBM Plex Mono',monospace">
+          各ペルソナのSystemPromptは編集可能です。クリックして直接修正してください。
+        </div>
+        <div class="persona-preview-list" id="personaList"></div>
+      </div>
+    </div>
+
+    <div class="export-bar">
+      <span class="export-label">EXPORT</span>
+      <span class="export-info" id="exportInfo">0体</span>
+      <button class="btn-ghost" onclick="downloadJSON()">↓ JSON保存</button>
+      <button class="btn-ghost" onclick="copyJSON()">コピー</button>
+      <button class="btn-secondary" onclick="resetResult()" style="font-size:12px;padding:7px 14px">リセット</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== STATE =====
+let currentMode = 'stat';
+let currentModel = 'claude';
+let generatedPersonas = [];
+let formPersonaCount = 1;
+
+// ===== INIT =====
+window.addEventListener('load', function() {
+  var saved = localStorage.getItem('pf_key_' + currentModel);
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('keySt').textContent = '✓ 保存済み';
+    document.getElementById('keySt').className = 'key-st ok';
+  }
+});
+
+// ===== MODEL =====
+function switchModel() {
+  currentModel = document.getElementById('aiModel').value;
+  var saved = localStorage.getItem('pf_key_' + currentModel);
+  if (saved) {
+    document.getElementById('apiKeyInput').value = saved;
+    document.getElementById('keySt').textContent = '✓ 保存済み';
+    document.getElementById('keySt').className = 'key-st ok';
+  } else {
+    document.getElementById('apiKeyInput').value = '';
+    document.getElementById('keySt').textContent = '未設定';
+    document.getElementById('keySt').className = 'key-st';
+  }
+}
+
+function saveKey() {
+  var key = document.getElementById('apiKeyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('pf_key_' + currentModel, key);
+  document.getElementById('keySt').textContent = '✓ 保存済み';
+  document.getElementById('keySt').className = 'key-st ok';
+}
+
+function getKey() {
+  return localStorage.getItem('pf_key_' + currentModel) || document.getElementById('apiKeyInput').value.trim();
+}
+
+// ===== MODE =====
+function setMode(mode) {
+  currentMode = mode;
+  ['stat','doc','form'].forEach(function(m) {
+    document.getElementById('mode-' + m).classList.toggle('active', m === mode);
+    document.getElementById('panel-' + m).classList.toggle('active', m === mode);
+  });
+}
+
+// ===== FORM PERSONA ADD =====
+function addFormPersona() {
+  var idx = formPersonaCount++;
+  var div = document.createElement('div');
+  div.className = 'form-persona';
+  div.id = 'fp-' + idx;
+  div.innerHTML = '<div class="divider"></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+      '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:var(--accent2)">PERSONA ' + (idx+1) + '</div>' +
+      '<button class="btn-ghost" onclick="this.closest(\'.form-persona\').remove()" style="color:var(--danger)">✕ 削除</button>' +
+    '</div>' +
+    '<div class="fg"><div class="f"><label>名前<span class="req">*</span></label><input type="text" class="fp-name" placeholder="例：志水ユウト" /></div><div class="f"><label>年齢・性別</label><input type="text" class="fp-age" placeholder="例：20歳・男性" /></div></div>' +
+    '<div class="fg"><div class="f"><label>職業・立場</label><input type="text" class="fp-job" placeholder="例：大学2年生" /></div><div class="f"><label>居住地</label><input type="text" class="fp-area" placeholder="例：神奈川県、実家暮らし" /></div></div>' +
+    '<div class="fg fg-1"><div class="f"><label>一言で表すと</label><input type="text" class="fp-tagline" placeholder="例：効率と自由を最優先にする堅実派" /></div></div>' +
+    '<div class="fg fg-1"><div class="f"><label>特徴・行動・価値観キーワード</label><input type="text" class="fp-keywords" placeholder="例：倹約, ガジェット好き, PayPay中心, 効率重視" /></div></div>' +
+    '<div class="fg fg-1"><div class="f"><label>補足情報<span class="opt">（任意）</span></label><textarea class="fp-notes" style="min-height:80px" placeholder="行動パターン、消費特性など"></textarea></div></div>';
+  document.getElementById('formPersonas').appendChild(div);
+}
+
+// ===== AI CALL =====
+async function callAI(systemPrompt, userPrompt) {
+  var key = getKey();
+  if (!key) throw new Error('APIキーが設定されていません');
+
+  if (currentModel === 'claude') {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    var d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.content[0].text;
+
+  } else if (currentModel === 'gemini') {
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=' + key;
+    var res2 = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ parts: [{ text: userPrompt }] }]
+      })
+    });
+    var d2 = await res2.json();
+    if (d2.error) throw new Error(d2.error.message);
+    return d2.candidates[0].content.parts[0].text;
+
+  } else {
+    var res3 = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 4000,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ]
+      })
+    });
+    var d3 = await res3.json();
+    if (d3.error) throw new Error(d3.error.message);
+    return d3.choices[0].message.content;
+  }
+}
+
+function toArray(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') return val.split(/[、,，\n]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  return [String(val)];
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===== PROMPT BUILDER =====
+var SYS_PROMPT = 'あなたはマーケティングリサーチの専門家です。与えられた情報をもとに、リアルな生活者ペルソナを生成してください。必ずJSONのみを返し、前置きや説明は一切不要です。';
+
+var OUTPUT_SCHEMA = '以下のJSON形式で出力してください（配列）：\n[\n  {\n    "label": "名前（年齢）",\n    "emoji": "性別・属性に合う絵文字1文字",\n    "desc": "このペルソナを一言で表すタグライン（30文字以内）",\n    "tags": ["特徴キーワード1", "特徴キーワード2", "特徴キーワード3", "特徴キーワード4"],\n    "profile": "あなたは〇〇です。で始まる、AIがこのペルソナとして振る舞うためのsystemPrompt（300〜500文字）。一人称・口調・行動パターン・価値観・金融サービスへの態度を含む。"\n  }\n]\n\nprofileは必ず「あなたは」で始め、リアルで具体的な生活者像を書いてください。マーケティング用語は使わず、自然な人物描写で。';
+
+// ===== GENERATE: STAT =====
+async function generateStat() {
+  var data = document.getElementById('stat-data').value.trim();
+  var title = document.getElementById('stat-title').value.trim();
+  var count = document.getElementById('stat-count').value;
+  var ctx = document.getElementById('stat-context').value.trim();
+  var errEl = document.getElementById('stat-err');
+
+  if (!data) { showErr(errEl, 'データを入力してください'); return; }
+  errEl.classList.remove('on');
+
+  setLoading(true, 'セグメントデータを分析しペルソナを生成中...');
+  try {
+    var user = '以下のセグメントデータをもとに、' + count + '体のリアルなペルソナを生成してください。\n\n';
+    if (title) user += '【セグメント定義】\n' + title + '\n\n';
+    if (ctx) user += '【用途】\n' + ctx + '\n\n';
+    user += '【データ】\n' + data + '\n\n' + OUTPUT_SCHEMA;
+    var raw = await callAI(SYS_PROMPT, user);
+    parseAndRender(raw);
+  } catch(e) {
+    showErr(errEl, e.message);
+    setLoading(false);
+  }
+}
+
+// ===== GENERATE: DOC =====
+async function generateDoc() {
+  var data = document.getElementById('doc-data').value.trim();
+  var ctx = document.getElementById('doc-context').value.trim();
+  var errEl = document.getElementById('doc-err');
+
+  if (!data) { showErr(errEl, 'ペルソナ文書を入力してください'); return; }
+  errEl.classList.remove('on');
+
+  setLoading(true, 'ペルソナ文書を変換中...');
+  try {
+    var user = '以下のペルソナ文書をSynthetic Meaning Space用のJSONに変換してください。複数のペルソナが含まれている場合は全て変換してください。\n\n';
+    if (ctx) user += '【用途】\n' + ctx + '\n\n';
+    user += '【ペルソナ文書】\n' + data + '\n\n' + OUTPUT_SCHEMA;
+    var raw = await callAI(SYS_PROMPT, user);
+    parseAndRender(raw);
+  } catch(e) {
+    showErr(errEl, e.message);
+    setLoading(false);
+  }
+}
+
+// ===== GENERATE: FORM =====
+async function generateForm() {
+  var errEl = document.getElementById('form-err');
+  var ctx = document.getElementById('form-context').value.trim();
+  var fps = document.querySelectorAll('.form-persona');
+  var personas = [];
+
+  fps.forEach(function(fp) {
+    var name = fp.querySelector('.fp-name').value.trim();
+    if (!name) return;
+    personas.push({
+      name: name,
+      age: fp.querySelector('.fp-age').value.trim(),
+      job: fp.querySelector('.fp-job').value.trim(),
+      area: fp.querySelector('.fp-area').value.trim(),
+      tagline: fp.querySelector('.fp-tagline').value.trim(),
+      keywords: fp.querySelector('.fp-keywords').value.trim(),
+      notes: fp.querySelector('.fp-notes').value.trim()
+    });
+  });
+
+  if (!personas.length) { showErr(errEl, '少なくとも1体のペルソナ名を入力してください'); return; }
+  errEl.classList.remove('on');
+
+  setLoading(true, 'ペルソナを生成中...');
+  try {
+    var user = '以下の情報をもとに、リアルなペルソナを生成してください。\n\n';
+    if (ctx) user += '【用途】\n' + ctx + '\n\n';
+    personas.forEach(function(p, i) {
+      user += '【ペルソナ' + (i+1) + '】\n';
+      if (p.name) user += '名前：' + p.name + '\n';
+      if (p.age) user += '年齢・性別：' + p.age + '\n';
+      if (p.job) user += '職業：' + p.job + '\n';
+      if (p.area) user += '居住地：' + p.area + '\n';
+      if (p.tagline) user += '一言：' + p.tagline + '\n';
+      if (p.keywords) user += 'キーワード：' + p.keywords + '\n';
+      if (p.notes) user += '補足：' + p.notes + '\n';
+      user += '\n';
+    });
+    user += OUTPUT_SCHEMA;
+    var raw = await callAI(SYS_PROMPT, user);
+    parseAndRender(raw);
+  } catch(e) {
+    showErr(errEl, e.message);
+    setLoading(false);
+  }
+}
+
+// ===== PARSE & RENDER =====
+function parseAndRender(raw) {
+  try {
+    var clean = raw.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(clean);
+    if (!Array.isArray(parsed)) parsed = [parsed];
+    generatedPersonas = parsed;
+    renderResult();
+    setLoading(false);
+  } catch(e) {
+    setLoading(false);
+    alert('JSONのパースに失敗しました。もう一度試してください。\n\n' + e.message);
+  }
+}
+
+function renderResult() {
+  var list = document.getElementById('personaList');
+  list.innerHTML = generatedPersonas.map(function(p, idx) {
+    var tags = toArray(p.tags);
+    return '<div class="persona-preview-card" id="ppc-' + idx + '">' +
+      '<div class="preview-head" onclick="togglePreview(' + idx + ')">' +
+        '<div class="preview-emoji">' + escHtml(p.emoji || '🧑') + '</div>' +
+        '<div>' +
+          '<div class="preview-name">' + escHtml(p.label) + '</div>' +
+          '<div class="preview-desc" style="font-size:11px;color:var(--muted);margin-top:2px">' + escHtml(p.desc || '') + '</div>' +
+        '</div>' +
+        '<div class="preview-tags">' + tags.map(function(t){ return '<span class="preview-tag">' + escHtml(t) + '</span>'; }).join('') + '</div>' +
+        '<div class="preview-toggle" id="ptoggle-' + idx + '">▼ 展開</div>' +
+      '</div>' +
+      '<div class="preview-body" id="pbody-' + idx + '">' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">' +
+          '<label style="text-transform:none;font-size:11px;color:var(--dim)">絵文字：</label>' +
+          '<input type="text" class="emoji-input" value="' + escHtml(p.emoji || '🧑') + '" onchange="updateEmoji(' + idx + ',this.value)" />' +
+        '</div>' +
+        '<div class="preview-profile-label">SYSTEM PROMPT（クリックで編集）</div>' +
+        '<div class="preview-profile" contenteditable="true" id="profile-' + idx + '" onblur="updateProfile(' + idx + ',this.innerText)">' + escHtml(p.profile || '') + '</div>' +
+        '<div class="preview-actions">' +
+          '<button class="btn-ghost" style="color:var(--danger);font-size:11px" onclick="removePersona(' + idx + ')">✕ 削除</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('exportInfo').textContent = generatedPersonas.length + '体のペルソナ';
+  document.getElementById('resultSection').style.display = 'block';
+  document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function togglePreview(idx) {
+  var body = document.getElementById('pbody-' + idx);
+  var toggle = document.getElementById('ptoggle-' + idx);
+  var open = body.classList.toggle('open');
+  toggle.textContent = open ? '▲ 閉じる' : '▼ 展開';
+}
+
+function updateEmoji(idx, val) {
+  generatedPersonas[idx].emoji = val;
+}
+
+function updateProfile(idx, val) {
+  generatedPersonas[idx].profile = val.trim();
+}
+
+function removePersona(idx) {
+  generatedPersonas.splice(idx, 1);
+  renderResult();
+}
+
+// ===== EXPORT =====
+function downloadJSON() {
+  if (!generatedPersonas.length) return;
+  var out = generatedPersonas.map(function(p) {
+    return {
+      label: p.label,
+      emoji: p.emoji || '🧑',
+      desc: p.desc || '',
+      tags: toArray(p.tags),
+      profile: document.getElementById('profile-' + generatedPersonas.indexOf(p))
+        ? document.getElementById('profile-' + generatedPersonas.indexOf(p)).innerText.trim()
+        : p.profile
+    };
+  });
+  var blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'personas-' + Date.now() + '.json';
+  a.click();
+}
+
+function copyJSON() {
+  if (!generatedPersonas.length) return;
+  var out = generatedPersonas.map(function(p, idx) {
+    return {
+      label: p.label,
+      emoji: p.emoji || '🧑',
+      desc: p.desc || '',
+      tags: toArray(p.tags),
+      profile: document.getElementById('profile-' + idx)
+        ? document.getElementById('profile-' + idx).innerText.trim()
+        : p.profile
+    };
+  });
+  navigator.clipboard.writeText(JSON.stringify(out, null, 2)).then(function() {
+    alert('JSONをクリップボードにコピーしました');
+  });
+}
+
+function resetResult() {
+  generatedPersonas = [];
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('personaList').innerHTML = '';
+}
+
+// ===== UTILS =====
+function setLoading(on, text) {
+  document.getElementById('loadingArea').style.display = on ? 'block' : 'none';
+  if (text) document.getElementById('loadingText').textContent = text;
+}
+
+function showErr(el, msg) {
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('on');
+}
+</script>
+</body>
+</html>
