@@ -820,7 +820,7 @@ async function extractFile(file, mode) {
       throw new Error('対応していないファイル形式です（PDF / PPTX / DOCX / TXT / CSV）');
     }
 
-    if (!text.trim()) throw new Error('テキストを抽出できませんでした');
+    if (!text.trim()) throw new Error('テキストを抽出できませんでした。スクリーンキャプチャPDFの場合はテキストを手動でコピーして貼り付けてください。');
 
     document.getElementById(targetId).value = text;
     statusEl.textContent = '✓ ' + file.name + ' — ' + text.length + '文字を抽出しました';
