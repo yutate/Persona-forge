@@ -435,7 +435,39 @@ textarea { resize: vertical; line-height: 1.7; min-height: 120px; }
 /* ===== SECTION HIDE ===== */
 .mode-panel { display: none; }
 .mode-panel.active { display: block; }
+
+/* ===== FILE DROP ===== */
+.file-drop {
+  background: var(--surface2);
+  border: 1px dashed var(--border2);
+  border-radius: 6px;
+  padding: 22px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+  position: relative;
+}
+.file-drop:hover, .file-drop.drag { border-color: var(--accent2); background: rgba(212,160,23,0.04); }
+.file-drop-icon { font-size: 24px; margin-bottom: 6px; }
+.file-drop-label { font-size: 12px; color: var(--muted); }
+.file-drop-hint { font-size: 10px; color: var(--dim); font-family: 'IBM Plex Mono', monospace; margin-top: 4px; }
+.file-drop-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 3px;
+  display: none;
+}
+.file-drop-status.ok { display: block; color: var(--accent3); background: rgba(232,200,74,0.08); border: 1px solid rgba(232,200,74,0.2); }
+.file-drop-status.err { display: block; color: var(--danger); background: rgba(232,64,64,0.08); border: 1px solid rgba(232,64,64,0.2); }
+.file-drop-progress { height: 2px; background: var(--surface3); border-radius: 1px; margin-top: 8px; display:none; }
+.file-drop-progress.on { display: block; }
+.file-drop-progress-inner { height: 100%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:1px; animation: loadpulse 1.2s ease-in-out infinite; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -499,7 +531,21 @@ textarea { resize: vertical; line-height: 1.7; min-height: 120px; }
         <span class="card-title">統計データ入力</span>
       </div>
       <div class="card-body">
-        <div class="hint">DS.Insight、Nielsen、GfKなどのセグメントレポートからコピーしたテキストを貼り付けてください。PDFから直接コピー可。</div>
+        <div class="hint">DS.Insight、Nielsen、GfKなどのセグメントレポートからコピーしたテキストを貼り付けてください。PDFやテキストファイルのアップロードも可。</div>
+
+        <!-- FILE DROP: STAT -->
+        <div class="file-drop" id="stat-drop"
+          onclick="document.getElementById('stat-file').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleFileDrop(event,'stat')">
+          <div class="file-drop-icon">📂</div>
+          <div class="file-drop-label">ファイルをドロップ、またはクリックして選択</div>
+          <div class="file-drop-hint">PDF / PPTX / DOCX / TXT / CSV</div>
+          <div class="file-drop-progress" id="stat-drop-progress"><div class="file-drop-progress-inner"></div></div>
+          <div class="file-drop-status" id="stat-drop-status"></div>
+        </div>
+        <input type="file" id="stat-file" accept=".pdf,.pptx,.docx,.txt,.csv,.text" style="display:none" onchange="handleFileSelect(event,'stat')" />
         <div class="fg fg-1">
           <div class="f">
             <label>セグメント定義 / レポートタイトル<span class="opt">（例：ショッピング・旅行に興味がある大学生女性）</span></label>
@@ -544,7 +590,21 @@ textarea { resize: vertical; line-height: 1.7; min-height: 120px; }
         <span class="card-title">ペルソナ文書入力</span>
       </div>
       <div class="card-body">
-        <div class="hint">PPTXやWordのペルソナ資料をテキストコピーして貼り付けてください。複数ペルソナが含まれていても自動で分割します。</div>
+        <div class="hint">PPTXやWordのペルソナ資料をテキストコピーして貼り付けてください。ファイルを直接アップロードすることも可能です。複数ペルソナが含まれていても自動で分割します。</div>
+
+        <!-- FILE DROP: DOC -->
+        <div class="file-drop" id="doc-drop"
+          onclick="document.getElementById('doc-file').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleFileDrop(event,'doc')">
+          <div class="file-drop-icon">📂</div>
+          <div class="file-drop-label">ファイルをドロップ、またはクリックして選択</div>
+          <div class="file-drop-hint">PDF / PPTX / DOCX / TXT</div>
+          <div class="file-drop-progress" id="doc-drop-progress"><div class="file-drop-progress-inner"></div></div>
+          <div class="file-drop-status" id="doc-drop-status"></div>
+        </div>
+        <input type="file" id="doc-file" accept=".pdf,.pptx,.docx,.txt,.text" style="display:none" onchange="handleFileSelect(event,'doc')" />
         <div class="fg fg-1">
           <div class="f">
             <label>ペルソナ文書テキスト<span class="req">*</span></label>
@@ -720,6 +780,125 @@ function addFormPersona() {
     '<div class="fg fg-1"><div class="f"><label>特徴・行動・価値観キーワード</label><input type="text" class="fp-keywords" placeholder="例：倹約, ガジェット好き, PayPay中心, 効率重視" /></div></div>' +
     '<div class="fg fg-1"><div class="f"><label>補足情報<span class="opt">（任意）</span></label><textarea class="fp-notes" style="min-height:80px" placeholder="行動パターン、消費特性など"></textarea></div></div>';
   document.getElementById('formPersonas').appendChild(div);
+}
+
+// ===== FILE EXTRACTION =====
+function handleFileDrop(e, mode) {
+  e.preventDefault();
+  document.getElementById(mode + '-drop').classList.remove('drag');
+  var file = e.dataTransfer.files[0];
+  if (file) extractFile(file, mode);
+}
+
+function handleFileSelect(e, mode) {
+  var file = e.target.files[0];
+  if (file) extractFile(file, mode);
+}
+
+async function extractFile(file, mode) {
+  var statusEl = document.getElementById(mode + '-drop-status');
+  var progressEl = document.getElementById(mode + '-drop-progress');
+  var targetId = mode === 'stat' ? 'stat-data' : 'doc-data';
+
+  statusEl.className = 'file-drop-status';
+  statusEl.textContent = '';
+  progressEl.classList.add('on');
+
+  try {
+    var text = '';
+    var ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'pdf') {
+      text = await extractPDF(file);
+    } else if (ext === 'pptx') {
+      text = await extractPPTX(file);
+    } else if (ext === 'docx') {
+      text = await extractDOCX(file);
+    } else if (['txt','text','csv'].indexOf(ext) >= 0) {
+      text = await extractText(file);
+    } else {
+      throw new Error('対応していないファイル形式です（PDF / PPTX / DOCX / TXT / CSV）');
+    }
+
+    if (!text.trim()) throw new Error('テキストを抽出できませんでした');
+
+    document.getElementById(targetId).value = text;
+    statusEl.textContent = '✓ ' + file.name + ' — ' + text.length + '文字を抽出しました';
+    statusEl.className = 'file-drop-status ok';
+
+  } catch(e) {
+    statusEl.textContent = '⚠ ' + e.message;
+    statusEl.className = 'file-drop-status err';
+  } finally {
+    progressEl.classList.remove('on');
+  }
+}
+
+async function extractPDF(file) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('PDF.jsの読み込みに失敗しました');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var ab = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+  var texts = [];
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var content = await page.getTextContent();
+    var pageText = content.items.map(function(item) { return item.str; }).join(' ');
+    texts.push('--- Page ' + i + ' ---\n' + pageText);
+  }
+  return texts.join('\n\n');
+}
+
+async function extractPPTX(file) {
+  if (typeof JSZip === 'undefined') throw new Error('JSZipの読み込みに失敗しました');
+  var ab = await file.arrayBuffer();
+  var zip = await JSZip.loadAsync(ab);
+  var slideFiles = Object.keys(zip.files)
+    .filter(function(name) { return name.match(/^ppt\/slides\/slide\d+\.xml$/); })
+    .sort(function(a, b) {
+      var na = parseInt(a.match(/\d+/)[0]);
+      var nb = parseInt(b.match(/\d+/)[0]);
+      return na - nb;
+    });
+
+  var texts = [];
+  for (var i = 0; i < slideFiles.length; i++) {
+    var xml = await zip.files[slideFiles[i]].async('string');
+    var text = xml
+      .replace(/<a:br\/>/g, '\n')
+      .replace(/<\/a:p>/g, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'")
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+    if (text) texts.push('## Slide ' + (i+1) + '\n\n' + text);
+  }
+  return texts.join('\n\n');
+}
+
+async function extractDOCX(file) {
+  if (typeof JSZip === 'undefined') throw new Error('JSZipの読み込みに失敗しました');
+  var ab = await file.arrayBuffer();
+  var zip = await JSZip.loadAsync(ab);
+  if (!zip.files['word/document.xml']) throw new Error('word/document.xmlが見つかりません');
+  var xml = await zip.files['word/document.xml'].async('string');
+  var text = xml
+    .replace(/<w:br[^>]*\/>/g, '\n')
+    .replace(/<\/w:p>/g, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return text;
+}
+
+function extractText(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = function() { reject(new Error('ファイルの読み込みに失敗しました')); };
+    reader.readAsText(file, 'UTF-8');
+  });
 }
 
 // ===== AI CALL =====
